@@ -11,7 +11,7 @@ variable "target" {
   type = string
 }
 
-variable "duplicate-content-penalty-secret" {
+variable "duplicate_content_penalty_secret" {
   type = string
 }
 
@@ -19,7 +19,7 @@ variable "deployer" {
   type = string
 }
 
-variable "acm-certificate-arn" {
+variable "acm_certificate_arn" {
   type = string
 }
 

@@ -35,7 +35,7 @@ data "template_file" "bucket_policy" {
 
   vars = {
     bucket = var.site_bucket_name
-    secret = var.duplicate-content-penalty-secret
+    secret = var.duplicate_content_penalty_secret
   }
 }
 
@@ -102,17 +102,17 @@ resource "aws_cloudfront_distribution" "website_cdn" {
 
     custom_header {
       name  = "User-Agent"
-      value = var.duplicate-content-penalty-secret
+      value = var.duplicate_content_penalty_secret
     }
   }
 
-  default_root_object = var.default-root-object
+  default_root_object = var.default_root_object
 
   custom_error_response {
     error_code            = "404"
     error_caching_min_ttl = "360"
     response_code         = "200"
-    response_page_path    = var.not-found-response-path
+    response_page_path    = var.not_found_response_path
   }
 
   default_cache_behavior {
@@ -120,7 +120,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     cached_methods  = ["GET", "HEAD"]
 
     forwarded_values {
-      query_string = var.forward-query-string
+      query_string = var.forward_query_string
 
       cookies {
         forward = "none"
@@ -146,7 +146,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   }
 
   viewer_certificate {
-    acm_certificate_arn      = var.acm-certificate-arn
+    acm_certificate_arn      = var.acm_certificate_arn
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1"
   }

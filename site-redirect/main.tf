@@ -33,7 +33,7 @@ data "template_file" "bucket_policy" {
 
   vars = {
     bucket = "site.${replace(replace(var.domain, ".", "-"), "*", "star")}"
-    secret = var.duplicate-content-penalty-secret
+    secret = var.duplicate_content_penalty_secret
   }
 }
 
@@ -98,7 +98,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
 
     custom_header {
       name  = "User-Agent"
-      value = var.duplicate-content-penalty-secret
+      value = var.duplicate_content_penalty_secret
     }
   }
 
@@ -140,7 +140,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   }
 
   viewer_certificate {
-    acm_certificate_arn      = var.acm-certificate-arn
+    acm_certificate_arn      = var.acm_certificate_arn
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1"
   }

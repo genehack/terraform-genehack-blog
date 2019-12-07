@@ -80,10 +80,10 @@ variables:
        region = "eu-west-1"
        domain = "my.domain.com"
        site_bucket_name = "site_mydomain"
-       duplicate-content-penalty-secret = "some-secret-password"
+       duplicate_content_penalty_secret = "some-secret-password"
        deployer = "an-iam-username"
-       acm-certificate-arn = "arn:aws:acm:us-east-1:<id>:certificate/<cert-id>"
-       not-found-response-path = "/404.html"
+       acm_certificate_arn = "arn:aws:acm:us-east-1:<id>:certificate/<cert-id>"
+       not_found_response_path = "/404.html"
     }
 
 Note the double slash in the `source` variable. This is to indicate to
@@ -103,7 +103,7 @@ for more info.
 * `site_bucket_name`: the name of the bucket to create for the S3 based
   static website. Note that this needs to be globally unique across
   all AWS S3 buckets!
-* `duplicate-content-penalty-secret`: Value that will be used in a
+* `duplicate_content_penalty_secret`: Value that will be used in a
   custom header for a CloudFront distribution to gain access to the
   origin S3 bucket. If you make an S3 bucket available as the source
   for a CloudFront distribution, you have the risk of search bots to
@@ -121,21 +121,21 @@ for more info.
   push contents to the S3 bucket. This user will get a role policy
   attached to it, configured to have read/write access to the bucket
   that will be created.
-* `acm-certificate-arn`: the id of an certificate in AWS Certificate
+* `acm_certificate_arn`: the id of an certificate in AWS Certificate
   Manager. As this certificate will be used on a CloudFront
   distribution, Amazon's documentation states the certificate must be
   generated in the `us-east-1` region.
-* `default-root-object`: (Optional) default root object to be served
+* `default_root_object`: (Optional) default root object to be served
   by CloudFront. Defaults to `index.html`, but can be e.x.
   `v1.0.0/index.html` for versioned applications.
-* `not-found-response-path`: response path for the file that should be
+* `not_found_response_path`: response path for the file that should be
   served on 404. Default to `/404.html`, but can be e.x. `/index.html`
   for single page applications.
 * `trusted_signers`: (Optional) List of AWS account IDs that are
   allowed to create signed URLs for this distribution. May contain
   `self` to indicate the account where the distribution is created in.
 * `tags`: (Optional) Additional key/value pairs to set as tags.
-* `forward-query-string`: (Optional) Forward the query string to the
+* `forward_query_string`: (Optional) Forward the query string to the
   origin. Default value = `false`
 * `price_class`: (Optional) The price class that corresponds with the
   maximum price that you want to pay for CloudFront service. Read
@@ -164,9 +164,9 @@ for more info.
        region = "eu-west-1"
        domain = "my.domain.com"
        target = "domain.com"
-       duplicate-content-penalty-secret = "some-secret-password"
+       duplicate_content_penalty_secret = "some-secret-password"
        deployer = "an-iam-username"
-       acm-certificate-arn = "arn:aws:acm:us-east-1:<id>:certificate/<cert-id>"
+       acm_certificate_arn = "arn:aws:acm:us-east-1:<id>:certificate/<cert-id>"
     }
 
 ### Inputs

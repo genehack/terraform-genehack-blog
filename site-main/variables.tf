@@ -11,7 +11,7 @@ variable "site_bucket_name" {
   description = "The name of the S3 bucket to create to hold the site."
 }
 
-variable "duplicate-content-penalty-secret" {
+variable "duplicate_content_penalty_secret" {
   type = string
 }
 
@@ -19,7 +19,7 @@ variable "deployer" {
   type = string
 }
 
-variable "acm-certificate-arn" {
+variable "acm_certificate_arn" {
   type = string
 }
 
@@ -28,12 +28,12 @@ variable "routing_rules" {
   default = ""
 }
 
-variable "default-root-object" {
+variable "default_root_object" {
   type    = string
   default = "index.html"
 }
 
-variable "not-found-response-path" {
+variable "not_found_response_path" {
   type    = string
   default = "/404.html"
 }
@@ -49,7 +49,7 @@ variable "trusted_signers" {
   default = []
 }
 
-variable "forward-query-string" {
+variable "forward_query_string" {
   type        = bool
   description = "Forward the query string to the origin"
   default     = false
