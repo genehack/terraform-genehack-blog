@@ -9,19 +9,19 @@ allows for configuring the required DNS entries in Route53.
 The scripts also take care of:
 
 * Preventing the origin bucket being indexed by search bots.
-* Redirect other domains to the main site with proper rewriting.
+* Redirecting other domains to the main site with proper rewriting.
 * Access logging
-* Redirect HTTP to HTTPS
+* Redirecting HTTP to HTTPS
 
-These scripts suite my needs, but all evolution in the form of pull
-requests are welcome! To make this process fluent, create
+These scripts suit my needs, but all evolution in the form of pull
+requests is welcome! To make this process fluent, create
 [an issue](https://github.com/skyscrapers/terraform-website-s3-cloudfront-route53/issues)
 first describing what you want to contribute, then fork and create a
 branch with a clear name. Submit your work as a pull request.
 
 ## Introduction
 
-This repository is split in 4 parts, each of which can be used as a
+This repository is split into 4 parts, each of which can be used as a
 separate module in your own root script. The split is done because of
 the lack of conditional logic in Terraform 0.6.x. I leave the
 composition of the required setup to you, the user.
@@ -98,8 +98,8 @@ for more info.
   default value is `us-east-1`.
 * `domain`: the domain name by which you want to make the website
   available on the Internet. While we are not at the point of setting
-  up the DNS part, the CloudFront distribution needs to know for which
-  domain it needs to accept requests.
+  up the DNS part, the CloudFront distribution needs to know which
+  domain it needs to accept requests for.
 * `bucket_name`: the name of the bucket to create for the S3 based
   static website.
 * `duplicate-content-penalty-secret`: Value that will be used in a
@@ -110,12 +110,12 @@ for more info.
   _punishes_ you for this as you can read in
   [this article](https://support.google.com/webmasters/answer/66359?hl=en).
   We need to protect access to the source bucket. There are 2 options
-  to prevent this: using an Origin Access User between CloudFront
+  to do this: using an Origin Access User between the CloudFront
   distribution and the source S3 bucket, or using custom headers
   between the distribution and the bucket. The use of an Origin Access
-  User prescribes accessing the source bucket in REST mode which
-  results in bucket redirects not being followed. As a result, this
-  module will use the custom header option.
+  User prevents accessing the source bucket in REST mode, which
+  results in bucket redirects not being followed. Consequently, this
+  module uses the custom header option.
 * `deployer`: the name of an existing IAM user that will be used to
   push contents to the S3 bucket. This user will get a role policy
   attached to it, configured to have read/write access to the bucket
