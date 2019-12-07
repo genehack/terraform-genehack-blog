@@ -4,10 +4,12 @@
 ##
 ## Bucket name restrictions:
 ##    http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html
+##
 ## Duplicate Content Penalty protection:
 ##    Description: https://support.google.com/webmasters/answer/66359?hl=en
 ##    Solution: http://tuts.emrealadag.com/post/cloudfront-cdn-for-s3-static-web-hosting/
 ##        Section: Restricting S3 access to Cloudfront
+##
 ## Deploy remark:
 ##    Do not push files to the S3 bucket with an ACL giving public READ access, e.g s3-sync --acl-public
 ##
