@@ -79,7 +79,7 @@ variables:
 
        region = "eu-west-1"
        domain = "my.domain.com"
-       bucket_name = "site_mydomain"
+       site_bucket_name = "site_mydomain"
        duplicate-content-penalty-secret = "some-secret-password"
        deployer = "an-iam-username"
        acm-certificate-arn = "arn:aws:acm:us-east-1:<id>:certificate/<cert-id>"
@@ -100,7 +100,7 @@ for more info.
   available on the Internet. While we are not at the point of setting
   up the DNS part, the CloudFront distribution needs to know which
   domain it needs to accept requests for.
-* `bucket_name`: the name of the bucket to create for the S3 based
+* `site_bucket_name`: the name of the bucket to create for the S3 based
   static website. Note that this needs to be globally unique across
   all AWS S3 buckets!
 * `duplicate-content-penalty-secret`: Value that will be used in a

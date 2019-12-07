@@ -6,9 +6,9 @@ variable "domain" {
   type = string
 }
 
-variable "bucket_name" {
+variable "site_bucket_name" {
   type        = string
-  description = "The name of the S3 bucket to create."
+  description = "The name of the S3 bucket to create to hold the site."
 }
 
 variable "duplicate-content-penalty-secret" {
