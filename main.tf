@@ -9,7 +9,6 @@ provider "template" {
   version = "~> 2.1"
 }
 
-// FIXME need IAM user for deployment
 module "r53-zone" {
   source  = "./r53-zone"
   domain  = var.domain

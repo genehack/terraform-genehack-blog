@@ -57,9 +57,12 @@ resource "aws_s3_bucket" "website_bucket" {
   tags = local.tags
 }
 
-################################################################################################################
-## Configure the credentials and access to the bucket for a deployment user
-################################################################################################################
+// Create a deployment user and configure access
+resource "aws_iam_user" "deployer_user" {
+  name = var.deployer
+  force_destroy = true
+}
+
 data "template_file" "deployer_role_policy_file" {
   template = file("${path.module}/deployer_role_policy.json")
 
