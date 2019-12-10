@@ -1,12 +1,33 @@
 // Configure S3 buckets, IAM user, CloudFront
 
+// Make a random string to use as the cloudfront secret
+
+// If you make an S3 bucket available as the source for a CloudFront
+// distribution, you have the risk of search bots to index both this
+// source bucket and the distribution. Google _punishes_ you for this
+// as you can read in
+// https://support.google.com/webmasters/answer/66359?hl=en.
+
+// We need to protect access to the source bucket. There are 2 options
+// to do this: using an Origin Access User between the CloudFront
+// distribution and the source S3 bucket, or using custom headers
+// between the distribution and the bucket. The use of an Origin
+// Access User prevents accessing the source bucket in REST mode,
+// which results in bucket redirects not being followed. Consequently,
+// this module uses the custom header option.
+
+resource "random_password" "cloudfront_secret" {
+  length  = 24
+  special = false // don't use special characters just to avoid any hassles
+}
+
 // Configure the buckets and static website hosting
 data "template_file" "bucket_policy" {
   template = file("${path.module}/site_bucket_policy.json")
 
   vars = {
     bucket = "${var.site_bucket_name}"
-    secret = "${var.cloudfront_secret}"
+    secret = random_password.cloudfront_secret.result
   }
 }
 
@@ -97,7 +118,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
 
     custom_header {
       name  = "User-Agent"
-      value = "${var.cloudfront_secret}"
+      value = random_password.cloudfront_secret.result
     }
   }
 
