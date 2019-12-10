@@ -35,7 +35,7 @@ data "template_file" "bucket_policy" {
 
   vars = {
     bucket = var.site_bucket_name
-    secret = var.duplicate_content_penalty_secret
+    secret = var.cloudfront_secret
   }
 }
 
@@ -130,7 +130,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
 
     custom_header {
       name  = "User-Agent"
-      value = var.duplicate_content_penalty_secret
+      value = var.cloudfront_secret
     }
   }
 

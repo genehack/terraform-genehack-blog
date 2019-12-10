@@ -16,7 +16,7 @@ variable "logs_bucket_name" {
   description = "The name of the S3 bucket to create to hold access logs"
 }
 
-variable "duplicate_content_penalty_secret" {
+variable "cloudfront_secret" {
   type = string
 }
 

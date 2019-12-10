@@ -23,10 +23,10 @@ module "site-main" {
   domain                           = var.domain
   site_bucket_name                 = "genehack.blog-site"
   logs_bucket_name                 = "genehack.blog-logs"
-  duplicate_content_penalty_secret = "FtgDeqHZgjbfGCH4zKgKEk4qxyYhE#"
   deployer                         = "genehack.blog-deployer"
   acm_certificate_arn              = "${module.r53-zone.certificate_arn}"
   not_found_response_path          = "error.html"
+  cloudfront_secret       = var.cloudfront_secret
 }
 
 // set up ALIAS entry to map to cloudfront distribution

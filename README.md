@@ -80,7 +80,7 @@ variables:
        region = "eu-west-1"
        domain = "my.domain.com"
        site_bucket_name = "site_mydomain"
-       duplicate_content_penalty_secret = "some-secret-password"
+       cloudfront_secret = "some-secret-password"
        deployer = "an-iam-username"
        acm_certificate_arn = "arn:aws:acm:us-east-1:<id>:certificate/<cert-id>"
        not_found_response_path = "/404.html"
@@ -103,7 +103,7 @@ for more info.
 * `site_bucket_name`: the name of the bucket to create for the S3 based
   static website. Note that this needs to be globally unique across
   all AWS S3 buckets!
-* `duplicate_content_penalty_secret`: Value that will be used in a
+* `cloudfront_secret`: Value that will be used in a
   custom header for a CloudFront distribution to gain access to the
   origin S3 bucket. If you make an S3 bucket available as the source
   for a CloudFront distribution, you have the risk of search bots to
@@ -164,7 +164,7 @@ for more info.
        region = "eu-west-1"
        domain = "my.domain.com"
        target = "domain.com"
-       duplicate_content_penalty_secret = "some-secret-password"
+       cloudfront_secret = "some-secret-password-you-should-not-hardcode-here"
        deployer = "an-iam-username"
        acm_certificate_arn = "arn:aws:acm:us-east-1:<id>:certificate/<cert-id>"
     }
