@@ -5,7 +5,13 @@ This Git repository contains the required
 website, hosted out of an S3 bucket. The site is fronted by a
 CloudFront distribution, uses AWS Certificate Manager for HTTPS, and
 handles creating a DNS zone and configures the required DNS entries in
-Route53.
+Route53. The files in this repo only support hosting a site on a
+"naked" or "apex" domain (e.g., on `example.com`). The repo doesn't
+configure the extra bits required to also have the site respond on a
+sub-domain (e.g., on `www.example.com`). If you need that, you might
+want to look at
+[the repo](https://github.com/skyscrapers/terraform-website-s3-cloudfront-route53)
+this repo was forked from.
 
 The scripts also take care of:
 
@@ -16,10 +22,10 @@ The scripts also take care of:
 ## Introduction
 
 This repository is split into 3 parts, each of which can be used as a
-separate module in your own root script. I leave the composition of
-the required setup to you, the user.
+separate module in your own root script. You can see a working example
+of such a script in the `main.tf` file in this repo.
 
-* `r53-zone` : configuration of a Route53 zone and ACM cert with
+* `r53-zone`: configuration of a Route53 zone and ACM cert with
   DNS-based validations
 * `site-main`: setup of the site and logging S3 buckets with a
   CloudFront distribution in front of the site bucket
@@ -29,8 +35,9 @@ the required setup to you, the user.
 ## Top-level variables
 
 You'll want to set up a few top level variables (or modify the default
-values of the ones in `variables.tf`): `cloudfront_secret` (set via an
-enviroment variable for actual security...), `domain`, and `region`.
+values of the ones in `variables.tf`): `cloudfront_secret` (set this
+via an enviroment variable as described in the `description` field in
+the file for actual security...), `domain`, and `region`.
 
 ## Setting up the Route53 zone and ACM certs
 
