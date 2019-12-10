@@ -4,6 +4,7 @@ provider "aws" {
   profile = "default"
   region  = var.region
 }
+provider "random" { version = "~> 2.2" }
 provider "template" { version = "~> 2.1" }
 
 // set up route53 zone and certificate
@@ -20,7 +21,6 @@ module "site_main" {
   domain                  = "${var.domain}"
   site_bucket_name        = "${var.domain}-site"
   logs_bucket_name        = "${var.domain}-logs"
-  cloudfront_secret       = "${var.cloudfront_secret}"
   deployer                = "${var.domain}-deployer"
   acm_certificate_arn     = "${module.r53_zone.certificate_arn}"
   not_found_response_path = "error.html"

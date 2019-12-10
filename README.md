@@ -35,9 +35,7 @@ of such a script in the `main.tf` file in this repo.
 ## Top-level variables
 
 You'll want to set up a few top level variables (or modify the default
-values of the ones in `variables.tf`): `cloudfront_secret` (set this
-via an enviroment variable as described in the `description` field in
-the file for actual security...), `domain`, and `region`.
+values of the ones in `variables.tf`): `domain` and `region`.
 
 ## Setting up the Route53 zone and ACM certs
 
@@ -82,7 +80,6 @@ module and passing the appropriate variables:
      domain                  = "${var.domain}"
      site_bucket_name        = "${var.domain}-site"
      logs_bucket_name        = "${var.domain}-logs"
-     cloudfront_secret       = "${var.cloudfront_secret}"
      deployer                = "${var.domain}-deployer"
      acm_certificate_arn     = "${module.r53_zone.certificate_arn}"
      not_found_response_path = "error.html"
@@ -102,20 +99,6 @@ module and passing the appropriate variables:
   all AWS S3 buckets!
 * `logs_bucket_name`: the name of the bucket to create for access
   logging. Also needs to be globally unique.
-* `cloudfront_secret`: Value that will be used in a
-  custom header for a CloudFront distribution to gain access to the
-  origin S3 bucket. If you make an S3 bucket available as the source
-  for a CloudFront distribution, you have the risk of search bots to
-  index both this source bucket and the distribution. Google
-  _punishes_ you for this as you can read in
-  [this article](https://support.google.com/webmasters/answer/66359?hl=en).
-  We need to protect access to the source bucket. There are 2 options
-  to do this: using an Origin Access User between the CloudFront
-  distribution and the source S3 bucket, or using custom headers
-  between the distribution and the bucket. The use of an Origin Access
-  User prevents accessing the source bucket in REST mode, which
-  results in bucket redirects not being followed. Consequently, this
-  module uses the custom header option.
 * `deployer`: the name of an IAM user that will be created to be used
   to push contents to the S3 bucket. This user will get a role policy
   attached to it, configured to have read/write access to the bucket
