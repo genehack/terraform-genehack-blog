@@ -18,15 +18,15 @@ module "r53-zone" {
 
 // set up s3 buckets and policies
 module "site-main" {
-  source                           = "./site-main"
-  region                           = var.region
-  domain                           = var.domain
-  site_bucket_name                 = "genehack.blog-site"
-  logs_bucket_name                 = "genehack.blog-logs"
-  deployer                         = "genehack.blog-deployer"
-  acm_certificate_arn              = "${module.r53-zone.certificate_arn}"
-  not_found_response_path          = "error.html"
+  source                  = "./site-main"
+  region                  = var.region
+  domain                  = var.domain
+  site_bucket_name        = "genehack.blog-site"
+  logs_bucket_name        = "genehack.blog-logs"
   cloudfront_secret       = var.cloudfront_secret
+  deployer                = "genehack.blog-deployer"
+  acm_certificate_arn     = "${module.r53-zone.certificate_arn}"
+  not_found_response_path = "error.html"
 }
 
 // set up ALIAS entry to map to cloudfront distribution
