@@ -179,8 +179,7 @@ needed for your site to be accessed on a root domain.
 ## Credits
 
 This repository is forked from
-[https://github.com/skyscrapers/terraform-website-s3-cloudfront-route53]
-(https://github.com/skyscrapers/terraform-website-s3-cloudfront-route53)
+[https://github.com/skyscrapers/terraform-website-s3-cloudfront-route53](https://github.com/skyscrapers/terraform-website-s3-cloudfront-route53)
 but has undergone significant revision.
 
 **Enjoy!**
