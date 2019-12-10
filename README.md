@@ -3,93 +3,83 @@
 This Git repository contains the required
 [Terraform](https://www.terraform.io/) scripts to setup a static
 website, hosted out of an S3 bucket. The site is fronted by a
-CloudFront distribution, uses AWS Certificate Manager for HTTPS and
-allows for configuring the required DNS entries in Route53.
+CloudFront distribution, uses AWS Certificate Manager for HTTPS, and
+handles creating a DNS zone and configures the required DNS entries in
+Route53.
 
 The scripts also take care of:
 
 * Preventing the origin bucket being indexed by search bots.
-* Redirecting other domains to the main site with proper rewriting.
 * Access logging
 * Redirecting HTTP to HTTPS
 
-These scripts suit my needs, but all evolution in the form of pull
-requests is welcome! To make this process fluent, create
-[an issue](https://github.com/skyscrapers/terraform-website-s3-cloudfront-route53/issues)
-first describing what you want to contribute, then fork and create a
-branch with a clear name. Submit your work as a pull request.
-
 ## Introduction
 
-This repository is split into 4 parts, each of which can be used as a
-separate module in your own root script. The split is done because of
-the lack of conditional logic in Terraform 0.6.x. I leave the
-composition of the required setup to you, the user.
+This repository is split into 3 parts, each of which can be used as a
+separate module in your own root script. I leave the composition of
+the required setup to you, the user.
 
-* `site-main`: setup of the main S3 bucket with a CloudFront distribution
-* `site-redirect`: setup of the redirect S3 bucket with a CloudFront
-  distribution
-* `r53-cname`: configuration of a Route53 CNAME record pointing to a
-  CloudFront distribution
+* `r53-zone` : configuration of a Route53 zone and ACM cert with
+  DNS-based validations
+* `site-main`: setup of the site and logging S3 buckets with a
+  CloudFront distribution in front of the site bucket
 * `r53-alias`: configuration of a Route53 ALIAS record pointing to a
-  CloudFront distribution. Required for naked domain (APEX) setups.
+  CloudFront distribution
 
-With the above 4 modules, you can pick yourself what you need for setups like:
+## Top-level variables
 
-* single site on [https://sub.domain.com](https://sub.domain.com)
-* single site on [https://domain.com](https://domain.com)
-* main site on [https://www.domain.com](https://www.domain.com) and
-  redirecting the naked domain to the www version.
-* main site on [https://domain.com](https://domain.com) and
-  redirecting the www version to the naked domain.
+You'll want to set up a few top level variables (or modify the default
+values of the ones in `variables.tf`): `cloudfront_secret` (set via an
+enviroment variable for actual security...), `domain`, and `region`.
 
-Given the ease of setting up SSL secured sites with AWS Certificate
-Manager, the above modules do not offer the option to set up non-SSL
-sites. But since AWS Certificate Manager requires manual intervention
-to complete the certificate setup, you must create your certificates
-first before using the modules below.
+## Setting up the Route53 zone and ACM certs
 
-_Note:_ AWS Certificate Manager supports multiple regions. To use
-CloudFront with ACM certificates, the certificates must be requested
-in region us-east-1.
+Creating a Route53 zone corresponding to your domain, as well as
+requesting a certificate in ACM and setting up the appropriate DNS
+records to validate that cert, can be done as follows:
 
-## Configuring Terraform
+    module "r53-zone" {
+      source  = "./r53-zone"
+      domain  = "${var.domain}"
+      comment = "Zone for ${var.domain} // Managed by Terraform"
+    }
 
-The different modules do not define variables for the AWS provider.
-For ease of use, the configuration is done implicitly by setting the
-following environment variables:
+Note: this step requires you to have your DNS properly configured, or
+the certificate validation _*will*_ time out. When bootstraping, you
+can go into the AWS console, extract the provisioned DNS servers, and
+configure your DNS server entries. If you don't get this done in time
+and the certification validation fails, you can just re-run `terraform
+apply`.
 
-* `AWS_SECRET_ACCESS_KEY`
-* `AWS_ACCESS_KEY_ID`
-* `AWS_DEFAULT_REGION`
+### Inputs
 
-These variables are inherited by any Terraform modules and prevents
-passing too much TF variables from parent to module. This info was
-found [here](https://groups.google.com/d/msg/terraform-tool/GM1QisZ95qc/Pt8JqPVePHAJ).
+* `domain`: The domain you're going to be hosting the site at.
+* `comment` (Optional): Comment to associate with the zone
+
+### Outputs
+
+* `zone_id`: Zone ID of the Route53 zone that was created
+* `certificate_arn`: ARN of the created certificate from ACM
+* `name_servers`: List of name servers for the created Route53 zone
 
 ## Setting up the main site
 
-Creating all the resources for an S3 based static website, with a
-CloudFront distribution and using the appropriate SSL certificates is
-as easy as using the `site-main` module and passing the appropriate
-variables:
+Creating all the resources for an S3-based static website, including
+an IAM deployer user, with a CloudFront distribution, using the
+appropriate SSL certificates is as easy as using the `site-main`
+module and passing the appropriate variables:
 
     module "site-main" {
-       source = "github.com/skyscrapers/terraform-website-s3-cloudfront-route53//site-main"
-
-       region = "eu-west-1"
-       domain = "my.domain.com"
-       site_bucket_name = "site_mydomain"
-       cloudfront_secret = "some-secret-password"
-       deployer = "an-iam-username"
-       acm_certificate_arn = "arn:aws:acm:us-east-1:<id>:certificate/<cert-id>"
-       not_found_response_path = "/404.html"
+     source                  = "./site-main"
+     region                  = "${var.region}"
+     domain                  = "${var.domain}"
+     site_bucket_name        = "${var.domain}-site"
+     logs_bucket_name        = "${var.domain}-logs"
+     cloudfront_secret       = "${var.cloudfront_secret}"
+     deployer                = "${var.domain}-deployer"
+     acm_certificate_arn     = "${module.r53-zone.certificate_arn}"
+     not_found_response_path = "error.html"
     }
-
-Note the double slash in the `source` variable. This is to indicate to
-look into the subdirectory within the Github repository. See the
-[Terraform Modules documentation](https://www.terraform.io/docs/modules/sources.html#github)
-for more info.
 
 ### Inputs
 
@@ -103,6 +93,8 @@ for more info.
 * `site_bucket_name`: the name of the bucket to create for the S3 based
   static website. Note that this needs to be globally unique across
   all AWS S3 buckets!
+* `logs_bucket_name`: the name of the bucket to create for access
+  logging. Also needs to be globally unique.
 * `cloudfront_secret`: Value that will be used in a
   custom header for a CloudFront distribution to gain access to the
   origin S3 bucket. If you make an S3 bucket available as the source
@@ -117,8 +109,8 @@ for more info.
   User prevents accessing the source bucket in REST mode, which
   results in bucket redirects not being followed. Consequently, this
   module uses the custom header option.
-* `deployer`: the name of an existing IAM user that will be used to
-  push contents to the S3 bucket. This user will get a role policy
+* `deployer`: the name of an IAM user that will be created to be used
+  to push contents to the S3 bucket. This user will get a role policy
   attached to it, configured to have read/write access to the bucket
   that will be created.
 * `acm_certificate_arn`: the id of an certificate in AWS Certificate
@@ -134,7 +126,6 @@ for more info.
 * `trusted_signers`: (Optional) List of AWS account IDs that are
   allowed to create signed URLs for this distribution. May contain
   `self` to indicate the account where the distribution is created in.
-* `tags`: (Optional) Additional key/value pairs to set as tags.
 * `forward_query_string`: (Optional) Forward the query string to the
   origin. Default value = `false`
 * `price_class`: (Optional) The price class that corresponds with the
@@ -152,82 +143,22 @@ for more info.
 * `website_cdn_zone_id`: the Hosted Zone ID of the Cloudfront
   distribution. This zone ID is needed later on to create a Route53
   `ALIAS` record.
-* `website_bucket_id`: The website bucket id
-* `website_bucket_arn`: The website bucket arn
+* `site_bucket_id`: The website bucket id
+* `site_bucket_arn`: The website bucket arn
 * `website_cdn_id`: The CDN ID of the Cloudfront distribution.
 * `website_cdn_arn`: The ARN of the CDN
-
-## Setting up the redirect site
-
-    module "site-redirect" {
-       source = "github.com/skyscrapers/terraform-website-s3-cloudfront-route53//site-redirect"
-       region = "eu-west-1"
-       domain = "my.domain.com"
-       target = "domain.com"
-       cloudfront_secret = "some-secret-password-you-should-not-hardcode-here"
-       deployer = "an-iam-username"
-       acm_certificate_arn = "arn:aws:acm:us-east-1:<id>:certificate/<cert-id>"
-    }
-
-### Inputs
-
-* `tags`: (Optional) Additional key/value pairs to set as tags.
-* `default_root_object`: (Optional) The object that you want
-  CloudFront to return (for example, index.html) when an end user
-  requests the root URL. Default value = `index.html`
-* `price_class`: (Optional) The price class that corresponds with the
-  maximum price that you want to pay for CloudFront service. Read
-  [pricing page](https://aws.amazon.com/cloudfront/pricing/) for more
-  details. Options: `PriceClass_100` | `PriceClass_200` |
-  `PriceClass_All`. Default value = `PriceClass_200`
-
-### Outputs
-
-* `website_cdn_hostname`: the Amazon generated Cloudfront domain name.
-  You can already test accessing your website content by this
-  hostname. This hostname is needed later on to create a `CNAME`
-  record in Route53.
-* `website_cdn_zone_id`: the Hosted Zone ID of the Cloudfront
-  distribution. This zone ID is needed later on to create a Route53
-  `ALIAS` record.
-
-## Setting up the Route 53 CNAME
-
-Whether it is a main site or a redirect site, a CNAME DNS record is
-needed for your site to be accessed on a non-root domain.
-
-    module "dns-cname" {
-       source = "github.com/skyscrapers/terraform-website-s3-cloudfront-route53//r53-cname"
-
-       domain = "my.domain.com"
-       target = "${module.site-main.website_cdn_hostname}"
-       route53_zone_id = "<r53-zone-id>"
-    }
-
-### Inputs
-
-* `domain`: the domain name you want to use to access your static
-  website. This should match the domain name used in setting up either
-  a main or a redirect site.
-* `target`: the domain name of the CloudFront distribution to which
-  the domain name should point. You usually pass the
-  `website_cdn_hostname` output variable from the main or redirect
-  site here.
-* `route53_zone_id`: the Route53 Zone ID where the CNAME entry must be
-  created.
 
 ## Setting up the Route 53 ALIAS
 
 Whether it is a main site or a redirect site, an ALIAS DNS record is
 needed for your site to be accessed on a root domain.
 
-    module "dns-alias" {
-       source = "github.com/skyscrapers/terraform-website-s3-cloudfront-route53//r53-alias"
-
-       domain = "domain.com"
-       target = "${module.site-main.website_cdn_hostname}"
-       cdn_hosted_zone_id = "${module.site-main.website_cdn_zone_id}"
-       route53_zone_id = "<r53-zone-id>"
+    module "r53-alias" {
+      source             = "./r53-alias"
+      domain             = "${var.domain}"
+      target             = "${module.site-main.website_cdn_hostname}"
+      cdn_hosted_zone_id = "${module.site-main.website_cdn_zone_id}"
+      route53_zone_id    = "${module.r53-zone.zone_id}"
     }
 
 ### Inputs
@@ -245,12 +176,11 @@ needed for your site to be accessed on a root domain.
 * `route53_zone_id`: the Route53 Zone ID where the CNAME entry must be
   created.
 
-## Users
+## Credits
 
-If you are using the modules in this Git repository to set up your
-static site and you want some visibility, add your site and info below
-and submit a pull request:
-
-* [Skyscrapers](https://skyscrapers.eu) (Skyscrapers)
+This repository is forked from
+[https://github.com/skyscrapers/terraform-website-s3-cloudfront-route53]
+(https://github.com/skyscrapers/terraform-website-s3-cloudfront-route53)
+but has undergone significant revision.
 
 **Enjoy!**
