@@ -25,11 +25,11 @@ This repository is split into 3 parts, each of which can be used as a
 separate module in your own root script. You can see a working example
 of such a script in the `main.tf` file in this repo.
 
-* `r53-zone`: configuration of a Route53 zone and ACM cert with
+* `r53_zone`: configuration of a Route53 zone and ACM cert with
   DNS-based validations
-* `site-main`: setup of the site and logging S3 buckets with a
+* `site_main`: setup of the site and logging S3 buckets with a
   CloudFront distribution in front of the site bucket
-* `r53-alias`: configuration of a Route53 ALIAS record pointing to a
+* `r53_alias`: configuration of a Route53 ALIAS record pointing to a
   CloudFront distribution
 
 ## Top-level variables
@@ -45,8 +45,8 @@ Creating a Route53 zone corresponding to your domain, as well as
 requesting a certificate in ACM and setting up the appropriate DNS
 records to validate that cert, can be done as follows:
 
-    module "r53-zone" {
-      source  = "./r53-zone"
+    module "r53_zone" {
+      source  = "./r53_zone"
       domain  = "${var.domain}"
       comment = "Zone for ${var.domain} // Managed by Terraform"
     }
@@ -73,18 +73,18 @@ apply`.
 
 Creating all the resources for an S3-based static website, including
 an IAM deployer user, with a CloudFront distribution, using the
-appropriate SSL certificates is as easy as using the `site-main`
+appropriate SSL certificates is as easy as using the `site_main`
 module and passing the appropriate variables:
 
-    module "site-main" {
-     source                  = "./site-main"
+    module "site_main" {
+     source                  = "./site_main"
      region                  = "${var.region}"
      domain                  = "${var.domain}"
      site_bucket_name        = "${var.domain}-site"
      logs_bucket_name        = "${var.domain}-logs"
      cloudfront_secret       = "${var.cloudfront_secret}"
      deployer                = "${var.domain}-deployer"
-     acm_certificate_arn     = "${module.r53-zone.certificate_arn}"
+     acm_certificate_arn     = "${module.r53_zone.certificate_arn}"
      not_found_response_path = "error.html"
     }
 
@@ -160,12 +160,12 @@ module and passing the appropriate variables:
 Whether it is a main site or a redirect site, an ALIAS DNS record is
 needed for your site to be accessed on a root domain.
 
-    module "r53-alias" {
-      source             = "./r53-alias"
+    module "r53_alias" {
+      source             = "./r53_alias"
       domain             = "${var.domain}"
-      target             = "${module.site-main.website_cdn_hostname}"
-      cdn_hosted_zone_id = "${module.site-main.website_cdn_zone_id}"
-      route53_zone_id    = "${module.r53-zone.zone_id}"
+      target             = "${module.site_main.website_cdn_hostname}"
+      cdn_hosted_zone_id = "${module.site_main.website_cdn_zone_id}"
+      route53_zone_id    = "${module.r53_zone.zone_id}"
     }
 
 ### Inputs

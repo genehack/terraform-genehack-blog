@@ -72,7 +72,7 @@ resource "aws_iam_policy" "site_deployer_policy" {
   policy      = data.template_file.deployer_role_policy_file.rendered
 }
 
-resource "aws_iam_policy_attachment" "site-deployer-attach-user-policy" {
+resource "aws_iam_policy_attachment" "site_deployer_attach_user_policy" {
   name       = "${var.site_bucket_name}-deployer-policy-attachment"
   users      = [var.deployer]
   policy_arn = aws_iam_policy.site_deployer_policy.arn
