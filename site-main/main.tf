@@ -24,7 +24,7 @@ locals {
     {
       "domain" = var.domain
     },
-    )
+  )
 }
 
 ################################################################################################################
@@ -84,7 +84,7 @@ resource "aws_s3_bucket_public_access_block" "block_public_access" {
 
 // Create a deployment user and configure access
 resource "aws_iam_user" "deployer_user" {
-  name = var.deployer
+  name          = var.deployer
   force_destroy = true
 }
 

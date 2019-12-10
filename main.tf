@@ -18,10 +18,10 @@ module "r53-zone" {
 
 // set up s3 buckets and policies
 module "site-main" {
-  source           = "./site-main"
-  region           = var.region
-  domain           = var.domain
-  site_bucket_name = "genehack.blog-site"
+  source                           = "./site-main"
+  region                           = var.region
+  domain                           = var.domain
+  site_bucket_name                 = "genehack.blog-site"
   logs_bucket_name                 = "genehack.blog-logs"
   duplicate_content_penalty_secret = "FtgDeqHZgjbfGCH4zKgKEk4qxyYhE#"
   deployer                         = "genehack.blog-deployer"
