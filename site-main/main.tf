@@ -1,51 +1,22 @@
-################################################################################################################
-## Creates a setup to serve a static website from an AWS S3 bucket, with a Cloudfront CDN and
-## certificates from AWS Certificate Manager.
-##
-## Bucket name restrictions:
-##    http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html
-##
-## Duplicate Content Penalty protection:
-##    Description: https://support.google.com/webmasters/answer/66359?hl=en
-##    Solution: http://tuts.emrealadag.com/post/cloudfront-cdn-for-s3-static-web-hosting/
-##        Section: Restricting S3 access to Cloudfront
-##
-## Deploy remark:
-##    Do not push files to the S3 bucket with an ACL giving public READ access, e.g s3-sync --acl-public
-##
-## 2016-05-16
-##    AWS Certificate Manager supports multiple regions. To use CloudFront with ACM certificates, the
-##    certificates must be requested in region us-east-1
-################################################################################################################
+// Configure S3 buckets, IAM user, CloudFront
 
-locals {
-  tags = merge(
-    var.tags,
-    {
-      "domain" = var.domain
-    },
-  )
-}
-
-################################################################################################################
-## Configure the bucket and static website hosting
-################################################################################################################
+// Configure the buckets and static website hosting
 data "template_file" "bucket_policy" {
-  template = file("${path.module}/website_bucket_policy.json")
+  template = file("${path.module}/site_bucket_policy.json")
 
   vars = {
-    bucket = var.site_bucket_name
-    secret = var.cloudfront_secret
+    bucket = "${var.site_bucket_name}"
+    secret = "${var.cloudfront_secret}"
   }
 }
 
 resource "aws_s3_bucket" "logs_bucket" {
-  bucket = var.logs_bucket_name
+  bucket = "${var.logs_bucket_name}"
   acl    = "log-delivery-write"
 }
 
-resource "aws_s3_bucket" "website_bucket" {
-  bucket = var.site_bucket_name
+resource "aws_s3_bucket" "site_bucket" {
+  bucket = "${var.site_bucket_name}"
   policy = data.template_file.bucket_policy.rendered
 
   website {
@@ -58,12 +29,10 @@ resource "aws_s3_bucket" "website_bucket" {
     target_bucket = "${aws_s3_bucket.logs_bucket.id}"
     target_prefix = "${var.domain}/"
   }
-
-  tags = local.tags
 }
 
 resource "aws_s3_bucket_public_access_block" "block_public_access" {
-  bucket = "${aws_s3_bucket.website_bucket.id}"
+  bucket = "${aws_s3_bucket.site_bucket.id}"
 
   // Block public access to buckets and objects granted through new
   // access control lists (ACLs)
@@ -84,7 +53,7 @@ resource "aws_s3_bucket_public_access_block" "block_public_access" {
 
 // Create a deployment user and configure access
 resource "aws_iam_user" "deployer_user" {
-  name          = var.deployer
+  name          = "${var.deployer}"
   force_destroy = true
 }
 
@@ -92,7 +61,7 @@ data "template_file" "deployer_role_policy_file" {
   template = file("${path.module}/deployer_role_policy.json")
 
   vars = {
-    bucket = var.site_bucket_name
+    bucket = "${var.site_bucket_name}"
   }
 }
 
@@ -109,17 +78,15 @@ resource "aws_iam_policy_attachment" "site-deployer-attach-user-policy" {
   policy_arn = aws_iam_policy.site_deployer_policy.arn
 }
 
-################################################################################################################
-## Create a Cloudfront distribution for the static website
-################################################################################################################
+// Create a Cloudfront distribution for the static website
 resource "aws_cloudfront_distribution" "website_cdn" {
   enabled      = true
-  price_class  = var.price_class
+  price_class  = "${var.price_class}"
   http_version = "http2"
 
   origin {
-    origin_id   = "origin-bucket-${aws_s3_bucket.website_bucket.id}"
-    domain_name = aws_s3_bucket.website_bucket.website_endpoint
+    origin_id   = "origin-bucket-${aws_s3_bucket.site_bucket.id}"
+    domain_name = "${aws_s3_bucket.site_bucket.website_endpoint}"
 
     custom_origin_config {
       origin_protocol_policy = "http-only"
@@ -130,11 +97,11 @@ resource "aws_cloudfront_distribution" "website_cdn" {
 
     custom_header {
       name  = "User-Agent"
-      value = var.cloudfront_secret
+      value = "${var.cloudfront_secret}"
     }
   }
 
-  default_root_object = var.default_root_object
+  default_root_object = "${var.default_root_object}"
 
   custom_error_response {
     error_code            = "404"
@@ -160,7 +127,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     min_ttl          = "0"
     default_ttl      = "300"  //3600
     max_ttl          = "1200" //86400
-    target_origin_id = "origin-bucket-${aws_s3_bucket.website_bucket.id}"
+    target_origin_id = "origin-bucket-${aws_s3_bucket.site_bucket.id}"
 
     // This redirects any HTTP request to HTTPS. Security first!
     viewer_protocol_policy = "redirect-to-https"
@@ -180,5 +147,4 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   }
 
   aliases = [var.domain]
-  tags    = local.tags
 }

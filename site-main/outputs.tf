@@ -14,10 +14,10 @@ output "website_cdn_zone_id" {
   value = aws_cloudfront_distribution.website_cdn.hosted_zone_id
 }
 
-output "website_bucket_id" {
-  value = aws_s3_bucket.website_bucket.id
+output "site_bucket_id" {
+  value = aws_s3_bucket.site_bucket.id
 }
 
-output "website_bucket_arn" {
-  value = aws_s3_bucket.website_bucket.arn
+output "site_bucket_arn" {
+  value = aws_s3_bucket.site_bucket.arn
 }

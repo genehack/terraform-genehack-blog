@@ -10,13 +10,13 @@ provider "aws" {
 
 resource "aws_acm_certificate" "cert" {
   provider          = aws.us-east-1
-  domain_name       = var.domain
+  domain_name       = "${var.domain}"
   validation_method = "DNS"
 }
 
 resource "aws_route53_zone" "main" {
-  name    = var.domain
-  comment = var.comment
+  name    = "${var.domain}"
+  comment = "${var.comment}"
 }
 
 resource "aws_route53_record" "cert_validation" {

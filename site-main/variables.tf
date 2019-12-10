@@ -1,5 +1,5 @@
 variable "region" {
-  default = "us-east-1"
+  type = string
 }
 
 variable "domain" {
@@ -40,13 +40,6 @@ variable "default_root_object" {
 
 variable "not_found_response_path" {
   type    = string
-  default = "/404.html"
-}
-
-variable "tags" {
-  type        = map(string)
-  description = "Optional Tags"
-  default     = {}
 }
 
 variable "trusted_signers" {

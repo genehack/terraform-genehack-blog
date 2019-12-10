@@ -3,6 +3,6 @@ variable "domain" {
 }
 
 variable "comment" {
-  type = string
+  type    = string
   default = "Managed by Terraform"
 }
