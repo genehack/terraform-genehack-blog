@@ -125,8 +125,8 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     trusted_signers = var.trusted_signers
 
     min_ttl          = "0"
-    default_ttl      = "300"  //3600
-    max_ttl          = "1200" //86400
+    default_ttl      = "60"
+    max_ttl          = "300"
     target_origin_id = "origin-bucket-${aws_s3_bucket.site_bucket.id}"
 
     // This redirects any HTTP request to HTTPS. Security first!
