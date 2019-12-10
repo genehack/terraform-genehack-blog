@@ -124,7 +124,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     error_code            = "404"
     error_caching_min_ttl = "360"
     response_code         = "200"
-    response_page_path    = var.not_found_response_path
+    response_page_path    = "/${var.not_found_response_path}"
   }
 
   default_cache_behavior {
