@@ -26,18 +26,18 @@ data "template_file" "bucket_policy" {
   template = file("${path.module}/site_bucket_policy.json")
 
   vars = {
-    bucket = "${var.site_bucket_name}"
+    bucket = var.site_bucket_name
     secret = random_password.cloudfront_secret.result
   }
 }
 
 resource "aws_s3_bucket" "logs_bucket" {
-  bucket = "${var.logs_bucket_name}"
+  bucket = var.logs_bucket_name
   acl    = "log-delivery-write"
 }
 
 resource "aws_s3_bucket" "site_bucket" {
-  bucket = "${var.site_bucket_name}"
+  bucket = var.site_bucket_name
   policy = data.template_file.bucket_policy.rendered
 
   website {
@@ -47,13 +47,13 @@ resource "aws_s3_bucket" "site_bucket" {
   }
 
   logging {
-    target_bucket = "${aws_s3_bucket.logs_bucket.id}"
+    target_bucket = aws_s3_bucket.logs_bucket.id
     target_prefix = "${var.domain}/"
   }
 }
 
 resource "aws_s3_bucket_public_access_block" "block_public_access" {
-  bucket = "${aws_s3_bucket.site_bucket.id}"
+  bucket = aws_s3_bucket.site_bucket.id
 
   // Block public access to buckets and objects granted through new
   // access control lists (ACLs)
@@ -74,7 +74,7 @@ resource "aws_s3_bucket_public_access_block" "block_public_access" {
 
 // Create a deployment user and configure access
 resource "aws_iam_user" "deployer_user" {
-  name          = "${var.deployer}"
+  name          = var.deployer
   force_destroy = true
 }
 
@@ -82,7 +82,7 @@ data "template_file" "deployer_role_policy_file" {
   template = file("${path.module}/deployer_role_policy.json")
 
   vars = {
-    bucket = "${var.site_bucket_name}"
+    bucket = var.site_bucket_name
   }
 }
 
@@ -102,12 +102,12 @@ resource "aws_iam_policy_attachment" "site_deployer_attach_user_policy" {
 // Create a Cloudfront distribution for the static website
 resource "aws_cloudfront_distribution" "website_cdn" {
   enabled      = true
-  price_class  = "${var.price_class}"
+  price_class  = var.price_class
   http_version = "http2"
 
   origin {
     origin_id   = "origin-bucket-${aws_s3_bucket.site_bucket.id}"
-    domain_name = "${aws_s3_bucket.site_bucket.website_endpoint}"
+    domain_name = aws_s3_bucket.site_bucket.website_endpoint
 
     custom_origin_config {
       origin_protocol_policy = "http-only"
@@ -122,7 +122,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     }
   }
 
-  default_root_object = "${var.default_root_object}"
+  default_root_object = var.default_root_object
 
   custom_error_response {
     error_code            = "404"
