@@ -11,6 +11,11 @@ variable "site_bucket_name" {
   description = "The name of the S3 bucket to create to hold the site."
 }
 
+variable "logs_bucket_name" {
+  type        = string
+  description = "The name of the S3 bucket to create to hold access logs"
+}
+
 variable "duplicate_content_penalty_secret" {
   type = string
 }

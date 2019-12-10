@@ -39,6 +39,11 @@ data "template_file" "bucket_policy" {
   }
 }
 
+resource "aws_s3_bucket" "logs_bucket" {
+  bucket = var.logs_bucket_name
+  acl    = "log-delivery-write"
+}
+
 resource "aws_s3_bucket" "website_bucket" {
   bucket = var.site_bucket_name
   policy = data.template_file.bucket_policy.rendered
@@ -49,10 +54,10 @@ resource "aws_s3_bucket" "website_bucket" {
     routing_rules  = var.routing_rules
   }
 
-  //  logging {
-  //    target_bucket = "${var.log_bucket}"
-  //    target_prefix = "${var.log_bucket_prefix}"
-  //  }
+  logging {
+    target_bucket = "${aws_s3_bucket.logs_bucket.id}"
+    target_prefix = "${var.domain}/"
+  }
 
   tags = local.tags
 }

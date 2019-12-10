@@ -22,8 +22,7 @@ module "site-main" {
   region           = var.region
   domain           = var.domain
   site_bucket_name = "genehack.blog-site"
-  // FIXME set up logging bucket
-  //  logs_bucket_name = "genehack.blog-logs"
+  logs_bucket_name                 = "genehack.blog-logs"
   duplicate_content_penalty_secret = "FtgDeqHZgjbfGCH4zKgKEk4qxyYhE#"
   deployer                         = "genehack.blog-deployer"
   acm_certificate_arn              = "${module.r53-zone.certificate_arn}"
