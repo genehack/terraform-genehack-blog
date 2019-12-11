@@ -133,6 +133,13 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   }
 
   default_cache_behavior {
+    min_ttl                = "0"
+    default_ttl            = "3600"
+    max_ttl                = "3600"
+    target_origin_id       = "origin-bucket-${aws_s3_bucket.site_bucket.id}"
+    viewer_protocol_policy = "redirect-to-https" // This redirects any HTTP request to HTTPS. Security first!
+    compress               = true
+
     allowed_methods = ["GET", "HEAD", "DELETE", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods  = ["GET", "HEAD"]
 
@@ -143,14 +150,6 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     }
     trusted_signers = var.trusted_signers
 
-    min_ttl          = "0"
-    default_ttl      = "60"
-    max_ttl          = "300"
-    target_origin_id = "origin-bucket-${aws_s3_bucket.site_bucket.id}"
-
-    // This redirects any HTTP request to HTTPS. Security first!
-    viewer_protocol_policy = "redirect-to-https"
-    compress               = true
   }
 
   restrictions {
