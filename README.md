@@ -113,9 +113,6 @@ module and passing the appropriate variables:
 * `not_found_response_path`: response path for the file that should be
   served on 404. Default to `/404.html`, but can be e.x. `/index.html`
   for single page applications.
-* `trusted_signers`: (Optional) List of AWS account IDs that are
-  allowed to create signed URLs for this distribution. May contain
-  `self` to indicate the account where the distribution is created in.
 * `forward_query_string`: (Optional) Forward the query string to the
   origin. Default value = `false`
 * `price_class`: (Optional) The price class that corresponds with the

@@ -148,8 +148,6 @@ resource "aws_cloudfront_distribution" "website_cdn" {
 
       cookies { forward = "none" }
     }
-    trusted_signers = var.trusted_signers
-
   }
 
   restrictions {

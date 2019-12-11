@@ -38,11 +38,6 @@ variable "not_found_response_path" {
   type    = string
 }
 
-variable "trusted_signers" {
-  type    = list(string)
-  default = []
-}
-
 variable "forward_query_string" {
   type        = bool
   description = "Forward the query string to the origin"
