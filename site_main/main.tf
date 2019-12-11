@@ -101,10 +101,12 @@ resource "aws_iam_policy_attachment" "site_deployer_attach_user_policy" {
 
 // Create a Cloudfront distribution for the static website
 resource "aws_cloudfront_distribution" "website_cdn" {
-  enabled      = true
-  price_class  = var.price_class
-  http_version = "http2"
+  enabled             = true
   is_ipv6_enabled     = true
+  price_class         = var.price_class
+  http_version        = "http2"
+  default_root_object = var.default_root_object
+  aliases             = [var.domain]
 
   origin {
     origin_id   = "origin-bucket-${aws_s3_bucket.site_bucket.id}"
@@ -123,8 +125,6 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     }
   }
 
-  default_root_object = var.default_root_object
-
   custom_error_response {
     error_code            = "404"
     error_caching_min_ttl = "360"
@@ -139,11 +139,8 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     forwarded_values {
       query_string = var.forward_query_string
 
-      cookies {
-        forward = "none"
-      }
+      cookies { forward = "none" }
     }
-
     trusted_signers = var.trusted_signers
 
     min_ttl          = "0"
@@ -157,9 +154,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   }
 
   restrictions {
-    geo_restriction {
-      restriction_type = "none"
-    }
+    geo_restriction { restriction_type = "none" }
   }
 
   viewer_certificate {
@@ -167,6 +162,4 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2018"
   }
-
-  aliases = [var.domain]
 }
