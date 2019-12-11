@@ -104,6 +104,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   enabled      = true
   price_class  = var.price_class
   http_version = "http2"
+  is_ipv6_enabled     = true
 
   origin {
     origin_id   = "origin-bucket-${aws_s3_bucket.site_bucket.id}"
@@ -127,7 +128,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   custom_error_response {
     error_code            = "404"
     error_caching_min_ttl = "360"
-    response_code         = "200"
+    response_code         = "404"
     response_page_path    = "/${var.not_found_response_path}"
   }
 
