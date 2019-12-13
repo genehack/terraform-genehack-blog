@@ -42,7 +42,7 @@ resource "aws_s3_bucket" "site_bucket" {
 
   website {
     index_document = "index.html"
-    error_document = "error.html"
+    error_document = var.not_found_response_path
     routing_rules  = var.routing_rules
   }
 
