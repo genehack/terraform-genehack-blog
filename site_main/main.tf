@@ -133,9 +133,9 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   }
 
   default_cache_behavior {
-    min_ttl                = "0"
+    min_ttl                = "3600"
     default_ttl            = "3600"
-    max_ttl                = "3600"
+    max_ttl                = "10800"
     target_origin_id       = "origin-bucket-${aws_s3_bucket.site_bucket.id}"
     viewer_protocol_policy = "redirect-to-https" // This redirects any HTTP request to HTTPS. Security first!
     compress               = true
